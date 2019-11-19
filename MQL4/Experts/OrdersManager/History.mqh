@@ -15,21 +15,30 @@
 class History
   {
 private:
-   int count;
+   int magicNumber;
+   int size;
 public:
                      History();
+                     History(int magicNumberIn);
                     ~History();
   Order              last();
   bool               isChanged();
   bool               isEmpty();
-  int                size();
+  int                count();
+  int                getSize();
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 History::History(){
-  count = OrdersHistoryTotal();
-  }
+   this.size = OrdersHistoryTotal();
+   }
+   
+History::History(int magicNumberIn){
+   this.magicNumber = magicNumberIn;
+   this.size = this.count();
+}
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -39,30 +48,48 @@ History::~History(){
 
 Order History::last(){
     Order order = Order();
-    if(OrderSelect(OrdersHistoryTotal()-1, SELECT_BY_POS, MODE_HISTORY)){
-         order
-            .withTicket(OrderTicket())
-            .withOrderType(OrderType());
-    }
-    return GetPointer(order);
+    if(OrdersHistoryTotal() > 0){
+      for(int i = OrdersHistoryTotal()-1; i>=0; i--){
+         if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY) && OrderMagicNumber() == magicNumber) {
+            order
+               .withTicket(OrderTicket())
+               .withOrderType(OrderType());
+            return GetPointer(order);
+         }
+      }
+   }
+   return GetPointer(order);
 }
 
 bool History::isChanged(){
-   if(OrdersHistoryTotal() > count) {
-      count = OrdersHistoryTotal();
+   int counter = this.count();
+   if(counter > this.size) {
+      this.size = counter;
       return true;
    }   
    return false;
 }
 
 bool History::isEmpty(){
-   if(OrdersHistoryTotal() > 0)
+   if(this.getSize() == 0)
       return true;
    return false;
 }
 
-int History::size(){
-   count = OrdersHistoryTotal();
-   return count;
+int History::getSize(void){
+   return this.size = this.count();
 }
 
+int History::count(){
+   int counter = 0;
+   if(OrdersHistoryTotal() > 0){
+      for(int i = OrdersHistoryTotal()-1; i>=0; i--){
+         if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY) && OrderMagicNumber() == magicNumber)
+            counter++;         
+      }
+   }
+   return counter;
+}
+
+
+   
