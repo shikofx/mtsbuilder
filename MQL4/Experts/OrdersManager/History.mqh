@@ -24,6 +24,7 @@ public:
   Order              last();
   bool               isChanged();
   bool               isEmpty();
+  int                countWithMagicNumber();
   int                count();
   int                getSize();
   };
@@ -62,9 +63,8 @@ Order History::last(){
 }
 
 bool History::isChanged(){
-   int counter = this.count();
-   if(counter > this.size) {
-      this.size = counter;
+   if(this.count() > this.size) {
+      this.size = this.count();
       return true;
    }   
    return false;
@@ -84,12 +84,24 @@ int History::count(){
    int counter = 0;
    if(OrdersHistoryTotal() > 0){
       for(int i = OrdersHistoryTotal()-1; i>=0; i--){
+         if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY))
+            counter++;         
+      }
+   }
+   return counter;
+}
+
+int History::countWithMagicNumber(){
+   int counter = 0;
+   if(OrdersHistoryTotal() > 0){
+      for(int i = OrdersHistoryTotal()-1; i>=0; i--){
          if(OrderSelect(i, SELECT_BY_POS, MODE_HISTORY) && OrderMagicNumber() == magicNumber)
             counter++;         
       }
    }
    return counter;
 }
+
 
 
    
